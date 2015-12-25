@@ -22,9 +22,10 @@ public class Node {
     }
 
     private void init() {
-        restLabelNum = labelNum();
+        calLabelNum();
         calSelfEntropy();
         calMajorLabel();
+        calUpperError();
         if (restLabelNum == 1) {
             return;
         } else {
@@ -36,7 +37,11 @@ public class Node {
     }
 
     private void calSelfEntropy() {
-        List<Integer> idList = Arrays.asList(instance);
+        Integer[] ins = new Integer[instance.length];
+        for (int i = 0; i != instance.length; ++i) {
+            ins[i] = instance[i];
+        }
+        List<Integer> idList = Arrays.asList(ins);
         entropy = calEntropy(idList);
     }
 
@@ -63,9 +68,12 @@ public class Node {
         }
         for (int t: featureMap.keySet()) {
             List<Integer> idList = featureMap.get(t);
-            int[] ids = idList.toArray(new int[idList.size()]);
+            int[] ids = new int[idList.size()];
+            for (int k = 0; k != ids.length; ++k) {
+                ids[k] = idList.get(k);
+            }
             Node child = new Node(ids, childrenFea);
-            childremMap.put(t, child);
+            childrenMap.put(t, child);
         }
     }
 
@@ -126,7 +134,11 @@ public class Node {
             }
         }
         majorLabel = maxLabel;
-        error = 1.0 - (double)MaxNum / instance.length;
+        error = 1.0 - (double)maxNum / instance.length;
+    }
+
+    private void calUpperError() {
+        upperError = upperLimit(error, instance.length);
     }
 
     private static double calEntropy(List<Integer> idList) {
@@ -159,32 +171,54 @@ public class Node {
         return result;
     }
 
-    private int labelNum() {
+    private void calLabelNum() {
         Set<Integer> labelSet = new HashSet<Integer>();
         for (int t: instance) {
             labelSet.add(label[t]);
         }
-        return labelSet.size();
+        restLabelNum = labelSet.size();
     }
 
     public void prune() {
-
+        if (isLeaf) {
+            return;
+        }
+        double childrenError = 0.0;
+        for (int t: childrenMap.keySet()) {
+            Node child = childrenMap.get(t);
+            child.prune();
+            childrenError += child.instance.length * child.upperError;
+        }
+        childrenError /= instance.length;
+        if (childrenError > upperError) {
+            childrenMap = null;
+            isLeaf = true;
+        } else {
+            upperError = childrenError;
+        }
+    }
+    private static double upperLimit(double f, double N){
+        return (f + z * z / (2 * N) + z * Math.sqrt(f / N - f * f / N + z * z / (4 * N * N)))/(1 + z * z / N);
     }
 
-    public static void setDataset(int[][] feature, int[] label) {
-        this.feature = feature;
-        this.label = label;
+
+    public static void setDataset(int[][] fea, int[] la) {
+        feature = fea;
+        label = la;
     }
 
     private int[] instance;
     private int[] restFeature;
     private double error;
+    private double entropy;
     private int majorLabel;
     private int restLabelNum;
     private boolean isLeaf = true;
     private int bestFeature;
     private Map<Integer, Node> childrenMap;
+    private double upperError;
     private static int[][] feature;
     private static int[] label;
+    private final static double z=1.150349;
 
 }

@@ -3,7 +3,8 @@ import java.util.Map;
 public class Main{
 
     public static void main(String[] args) {
-        String[] filePath = {"breast-cancer-assignment5.txt", "german-assignment5.txt"};
+        //String[] filePath = {"breast-cancer-assignment5.txt", "german-assignment5.txt"};
+        String[] filePath = {"german-assignment5.txt"};
         for (String f: filePath) {
             DataReader dr = new DataReader(f);
             double[][] numFeature = dr.getNumFeature();
@@ -47,8 +48,10 @@ public class Main{
                         trainFeature[j][k + numFeatureNum] = trainCateFeature[j][k];
                     }
                 }
-                DecisionTree tree = new DecisionTree(trainFeature, trainLabel);
-                int right = 0;
+                DecisionTree tree1 = new DecisionTree(trainFeature, clusterLabel);
+                DecisionTree tree2 = new DecisionTree(trainFeature, trainLabel);
+                int right1 = 0;
+                int right2 = 0;
                 for (int j = 0; j != testNum; ++j) {
                     int[] testDisFeature = disPro.discrete(testNumFeature[j]);
                     int[] testFeature = new int[numFeatureNum + cateFeatureNum];
@@ -58,14 +61,19 @@ public class Main{
                     for (int k = 0; k != cateFeatureNum; ++k) {
                         testFeature[k + numFeatureNum] = testCateFeature[j][k];
                     }
-                    int predictClusterId = tree.predict(testFeature);
+                    int predictClusterId = tree1.predict(testFeature);
                     int predictLabel = clusterLabelMap.get(predictClusterId);
                     if (predictLabel == testLabel[j]) {
-                        ++right;
+                        ++right1;
+                    }
+                    int pre2 = tree2.predict(testFeature);
+                    if (pre2 == testLabel[j]) {
+                        ++right2;
                     }
                 }
-                double accuracy = (double)right / testNum;
-                System.out.println(accuracy);
+                double accuracy = (double)right1 / testNum;
+                double acc2 = (double)right2 / testNum;
+                System.out.println(accuracy + "  " + acc2);
                 swapTest(numFeature, cateFeature, label, testNum);
             }
         }

@@ -30,16 +30,16 @@ public class DataReader {
         List<Integer[]> cateFeatureList = new ArrayList<Integer[]>();
         List<Integer> labelList = new ArrayList<Integer>();
         while (s.hasNextLine()) {
-            str=s.nextLine().split(",");
+            str = s.nextLine().split(",");
             Double[] numF = new Double[numFeatureNum];
             Integer[] cateF = new Integer[cateFeatureNum];
             int numI = 0;
             int cateI = 0;
             for (int i = 0; i != featureNum; ++i) {
                 if (featureType[i] == 0) {
-                    numF[numI++] = Double.valueOf(str[i]);
+                    numF[numI++] = Double.parseDouble(str[i]);
                 } else {
-                    cateF[cateI++] = Integer.valueOf(str[i]);
+                    cateF[cateI++] = (int)Double.parseDouble(str[i]);
                 }
             }
             if (str[featureNum].equals("1.0") || str[featureNum].equals("1")) {
@@ -57,7 +57,7 @@ public class DataReader {
             label[i] = labelList.get(i);
         }
         numFeature = new double[instanceNum][];
-        for (int i = 0; i!= numFeatureNum; ++i) {
+        for (int i = 0; i!= instanceNum; ++i) {
             Double[] tmp = numFeatureList.get(i);
             numFeature[i] = new double[numFeatureNum];
             for (int j = 0; j != numFeatureNum; ++j) {
@@ -65,7 +65,7 @@ public class DataReader {
             }
         }
         cateFeature = new int[instanceNum][];
-        for (int i = 0; i!= cateFeatureNum; ++i) {
+        for (int i = 0; i != instanceNum; ++i) {
             Integer[] tmp = cateFeatureList.get(i);
             cateFeature[i] = new int[cateFeatureNum];
             for (int j = 0; j != cateFeatureNum; ++j) {

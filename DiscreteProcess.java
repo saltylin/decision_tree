@@ -6,9 +6,9 @@ import java.util.ArrayList;
 
 public class DiscreteProcess {
 
-    public discreteProcess(double[][] numFeature) {
-        instanceNum = numFeature.length;
-        disFeature = new int[instance][];
+    public DiscreteProcess(double[][] numFeature) {
+        int instanceNum = numFeature.length;
+        disFeature = new int[instanceNum][];
         featureNum = numFeature[0].length;
         for (int i = 0; i != disFeature.length; ++i) {
             disFeature[i] = new int[featureNum];
@@ -35,7 +35,6 @@ public class DiscreteProcess {
                     }
                 }
             }
-        }
         }
     }
 

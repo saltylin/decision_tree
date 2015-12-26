@@ -2,7 +2,8 @@ import java.util.*;
 
 public class Cluster {
 
-    public Cluster(double[][] nf, int[][] cf, int[] la, int trainNum) {
+    public Cluster(double[][] nf, int[][] cf, int[] la) {
+        trainNum = nf.length;
         numFeature = new double[trainNum][];
         for (int i = 0; i != numFeature.length; ++i) {
             numFeature[i] = new double[nf[0].length];
@@ -22,7 +23,6 @@ public class Cluster {
             label[i] = la[i];
         }
         clusterLabel = new int[trainNum];
-        this.trainNum = trainNum;
         init();
     }
 
@@ -30,7 +30,7 @@ public class Cluster {
         return clusterLabel;
     }
 
-    public Map<Integer, Integer> get ClusterLabelMap() {
+    public Map<Integer, Integer> getClusterLabelMap() {
         return clusterLabelMap;
     }
 
@@ -85,7 +85,7 @@ public class Cluster {
             Map<Integer, Integer> tmpFreqMap = new HashMap<Integer, Integer>();
             for (int id: idList) {
                 int val = cateFeature[id][i];
-                if (!tmpFreqMap.contains(val)) {
+                if (!tmpFreqMap.containsKey(val)) {
                     tmpFreqMap.put(val, 1);
                 } else {
                     int pre = tmpFreqMap.get(val);
@@ -192,7 +192,7 @@ public class Cluster {
     private int[] label;
     private int[] clusterLabel;
     private Map<Integer, Integer> clusterLabelMap = new HashMap<Integer, Integer>();
-    private trainNum;
+    private int trainNum;
     private Map<Integer, List<Integer>> labelMap = new HashMap<Integer, List<Integer>>();
     private Map<Integer, List<Map<Integer, Integer>>> cateValueFreqMap = new HashMap<Integer, List<Map<Integer, Integer>>>();
     private final static int clusterNum = 5;

@@ -15,6 +15,10 @@ public class DecisionTree {
         root.prune();
     }
 
+    public int predict(int[] feature) {
+        return root.predict(feature);
+    }
+
     private Node root;
 
 }

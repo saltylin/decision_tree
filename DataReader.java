@@ -43,18 +43,18 @@ public class DataReader {
                 }
             }
             if (str[featureNum].equals("1.0") || str[featureNum].equals("1")) {
-                rawLabel.add(1);    
+                labelList.add(1);    
             } else {
-                rawLabel.add(-1);
+                labelList.add(-1);
             }
             numFeatureList.add(numF);
             cateFeatureList.add(cateF);
         }
         s.close();
-        int instanceNum = rawLabel.size();
+        int instanceNum = labelList.size();
         label = new int[instanceNum];
         for (int i = 0; i != instanceNum; ++i) {
-            label[i] = rawLabel.get(i);
+            label[i] = labelList.get(i);
         }
         numFeature = new double[instanceNum][];
         for (int i = 0; i!= numFeatureNum; ++i) {

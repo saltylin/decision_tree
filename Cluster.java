@@ -1,8 +1,8 @@
 import java.util.*;
 
-public class DataProcess {
+public class Cluster {
 
-    public DataProcess(double[][] nf, int[][] cf, int[] la, int trainNum) {
+    public Cluster(double[][] nf, int[][] cf, int[] la, int trainNum) {
         numFeature = new double[trainNum][];
         for (int i = 0; i != numFeature.length; ++i) {
             numFeature[i] = new double[nf[0].length];
@@ -21,17 +21,28 @@ public class DataProcess {
         for (int i = 0; i != label.length; ++i) {
             label[i] = la[i];
         }
+        clusterLabel = new int[trainNum];
         this.trainNum = trainNum;
         init();
     }
 
+    public int[] getClusterLabel() {
+        return clusterLabel;
+    }
+
+    public Map<Integer, Integer> get ClusterLabelMap() {
+        return clusterLabelMap;
+    }
+
     private void init() {
         calLabelMap();
+        int start = 0;
         for (int labelId: labelMap.keySet()) {
             List<Integer> idList = labelMap.get(labelId);
             normalizeEachClass(idList);
             calCateValueFreq(labelId, idList);
-            cluster(labelId, idList);
+            cluster(labelId, idList, start);
+            start += clusterNum;
         }
     }
 
@@ -86,7 +97,7 @@ public class DataProcess {
         cateValueFreqMap.put(labelId, freqList);
     }
 
-    private void cluster(int labelId, List<Integer> idList) {
+    private void cluster(int labelId, List<Integer> idList, int start) {
         final int iterateNum = 20;
         int instanceNum = idList.size();
         List<Map<Integer, Integer>> freqMap = cateValueFreqMap.get(labelId);
@@ -107,7 +118,10 @@ public class DataProcess {
         for (int i = 0; i != clusterNum; ++i) {
             clusterResult.add(new ArrayList<Integer>());
         }
-        for (int i = 0; i != iterateNum; ++i) {
+        for (int it = 0; it != iterateNum; ++it) {
+            for (List<Integer> clusterIdList: clusterResult) {
+                clusterIdList.clear();
+            }
             for (int id: idList) {
                 double maxSim = -1.0;
                 int maxClusterIndex = -1;
@@ -132,12 +146,52 @@ public class DataProcess {
                 }
                 clusterResult.get(maxClusterIndex).add(id);
             }
+            for (int i = 0; i != clusterNum; ++i) {
+                for (int j = 0; j != numFeature[0].length; ++j) {
+                    double avg = 0.0;
+                    for (int id: clusterResult.get(i)) {
+                        avg += numFeature[id][j];
+                    }
+                    avg /= clusterResult.get(i).size();
+                    centerNumFeature[i][j] = avg;
+                }
+                for (int j = 0; j != cateFeature[0].length; ++j) {
+                    Map<Integer, Integer> tmpValFreqMap = new HashMap<Integer, Integer>();
+                    for (int id: clusterResult.get(i)) {
+                        int tmpVal = cateFeature[id][j];
+                        if (!tmpValFreqMap.containsKey(tmpVal)) {
+                            tmpValFreqMap.put(tmpVal, 1);
+                        } else {
+                            int preFreq = tmpValFreqMap.get(tmpVal);
+                            tmpValFreqMap.put(tmpVal, 1 + preFreq);
+                        }
+                    }
+                    int maxFreq = 0;
+                    int maxVal = 0;
+                    for (int val: tmpValFreqMap.keySet()) {
+                        int tmpFreq = tmpValFreqMap.get(val);
+                        if (tmpFreq > maxFreq) {
+                            maxFreq = tmpFreq;
+                            maxVal = val;
+                        }
+                    }
+                    centerCateFeature[i][j] = maxVal;
+                }
+            }
+        }
+        for (int i = 0; i != clusterNum; ++i) {
+            for (int id: clusterResult.get(i)) {
+                clusterLabel[id] = i + start;
+            }
+            clusterLabelMap.put(i + start, labelId);
         }
     }
 
     private double[][] numFeature;
     private int[][] cateFeature;
     private int[] label;
+    private int[] clusterLabel;
+    private Map<Integer, Integer> clusterLabelMap = new HashMap<Integer, Integer>();
     private trainNum;
     private Map<Integer, List<Integer>> labelMap = new HashMap<Integer, List<Integer>>();
     private Map<Integer, List<Map<Integer, Integer>>> cateValueFreqMap = new HashMap<Integer, List<Map<Integer, Integer>>>();
